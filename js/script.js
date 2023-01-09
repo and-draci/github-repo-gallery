@@ -3,6 +3,11 @@ const overview = document.querySelector(".overview");
 const username = "and-draci";
 const repoList = document.querySelector(".repo-list");
 
+// Variable for all repo information
+const allRepoInfo = document.querySelector(".repos");
+//Variable for individual repo information.
+const repoData= document.querySelector(".repo-data");
+
 // Fetches repos with user info.
 const gitUserInfo = async function (){
     const userInfo = await fetch(`https://api.github.com/users/${username}`);
@@ -52,4 +57,61 @@ const displayRepos= function (repos) {
         repoList.append(repoItem);
     }
 };
+
+repoList.addEventListener("click", function (e){
+  if (e.target.matches("h3")) {
+    const repoName = e.target.innerText;
+  
+    getRepoInfo(repoName);
+  }
+});
+
+// Async function to get specific repo data
+
+const getRepoInfo = async function (repoName){
+  const fetchInfo= await fetch (`https://api.github.com/repos/${username}/${repoName}`);
+  const repoInfo = await fetchInfo.json();
+  
+  console.log(repoInfo);
+
+  // Captures data from the language url property.
+
+  const fetchLanguages = await fetch (repoInfo.languages_url);
+  const languageData = await fetchLanguages.json();
+
+  console.log (languageData);
+
+  // Lists the languages
+
+  const languages = [];
+  for (const language in languageData) {
+    languages.push(language);
+
+    console.log (languages);
+  }
+
+  displayRepoInfo(repoInfo, languages);
+};
+
+// Display specific repo data on web page
+
+const displayRepoInfo= function (repoInfo, languages) {
+  repoData.innerHTML = "";
+  const div = document.createElement("div"); 
+
+  repoData.classList.remove("hide");
+  allRepoInfo.classList.add("hide");
+
+  div.innerHTML = 
+  `<h3>Name: ${repoInfo.name}</h3>
+  <p>Description: ${repoInfo.description}</p>
+  <p>Default Branch: ${repoInfo.default_branch}</p>
+  <p>Languages: ${languages.join(", ")}</p>
+  <a class="visit" href="${repoInfo.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>
+`;
+
+repoData.append (div);
+
+};
+
 
